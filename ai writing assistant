@@ -1,0 +1,82 @@
+import os
+from google import genai
+from google.genai import types
+from colorama import Fore , init
+
+init(autoreset = True)
+api_key = "AIzaSyAy6LCRr1_ciWQn9dmp8K19X1mbsxyXj2s"
+client = genai.Client(api_key = api_key)
+
+def generate_response(prompt,temperature=0.3):
+   try:
+    contents = [types.Content(role = "user",parts = [types.Part.from_text(text = prompt)])]
+    config_params = types.GenerateContentConfig(temperature = temperature)
+    response = client.models.generate_content(model = "gemini-2.0-flash",contents = contents , config = config_params)
+    return response.text
+   except Exception as e:
+     return f"error {e}"
+
+def get_essay_details():
+  print("WELCOME TO AI WRIITING ASSISTANT")
+  topic = input("enter the topic of ur essay")
+  types = input("enter essay type (descriptive,analytical)")
+
+  choice = input("enter limit : 1.300 , 2.600 , 3.900 4.1200")
+  word_count = {"1":"300","2":"600","3":"900","4":"1200"}.get(choice , "300")
+  
+  audience = input("your target audiece (sg. student,prof.)")
+  points = input("any points u want to include?")
+  stance = input("ur (against/for/neutral)?")
+  refs = input("u waant to give any refrence (yes/no)?")
+  style = input("choose style (formal/converstaional etc.)")
+  outline = input("u want to have an outline (yes/no)")
+
+  return {
+      "topic":topic,
+      "types":types,
+      "choice":choice,
+      "word_count":word_count,
+      "audience":audience,
+      "points":points,
+      "stance":stance,
+      "refs":refs,
+      "style":style,
+      "outline":outline,
+  }
+
+def generate_essay(details):
+  temp = float(input("enter the temperature (0.2=structured , 0.7 = creative)"))
+  intro_prompt = f"write an intro of {details['types']} on {details['topic']} taking {details['stance']}"
+  print("--Introduction--")
+  print(generate_response(intro_prompt,temp))
+
+  body_type = input("1.full draft , 2 step by step")
+  if body_type == "1":
+    print("--Full width content--")
+    body_prompt = f"write an body_type of {details['types']} on {details['topic']} taking {details['stance']} taking style {details['style']} "
+    print(generate_response(body_prompt,temp))
+    
+  else :
+    print("--Step by step Explantion--")
+    step_prompt = f"write an intro of {details['types']} on {details['topic']} taking {details['stance']}"
+    print(generate_response(step_prompt,temp))
+
+  conclusion_prompt = f"write an essay on the topic {details['topic']} with type : {details['types']}  and stance {details['stance']}"
+  print("--Conclusion--")
+  print(generate_response(conclusion_prompt,temp))
+
+def feedback_loopp():
+  rating = input("rate the essay 1-5")
+  if rating != "5":
+    suggestion = input("what we can inprove")
+    print("okay thanks for ur suggestion!")
+  else:
+    print("happy writing")
+
+def main():
+  details = get_essay_details()
+  generate_essay(details)
+  feedback_loopp()
+
+
+main()
